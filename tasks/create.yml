@@ -26,6 +26,7 @@
   ec2_vpc_dhcp_option:
     domain_name: "{{ dns_domain | default(omit) }}"
     dns_servers: AmazonProvidedDNS
+    region: "{{ region }}"
     tags:
       Name: "VPC {{ vpc_name }}"
       VPC: "{{ vpc_name }}"
