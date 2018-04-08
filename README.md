@@ -70,7 +70,7 @@ GPL
 Author Information
 ------------------
 
-Iain M. Conochie <iain.conochie@accaglobal.com>
+Iain M. Conochie <iain@shihad.org>
 
 Bugs
 ------------------
