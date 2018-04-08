@@ -5,6 +5,10 @@
     vpc_id: "{{ vpc_id }}"
     state: present
     region: "{{ region }}"
+    tags:
+      Name: "Internet gateway for {{ vpc_name }} VPC"
+      VPC: "{{ vpc_name }}"
+
   register: new_ec2_vpc_igw
 
 - name: Set IGW ID in fact
