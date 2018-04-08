@@ -1,0 +1,12 @@
+---
+
+- name: Create new Internet Gateway
+  ec2_vpc_igw:
+    vpc_id: "{{ vpc_id }}"
+    state: present
+    region: "{{ region }}"
+  register: new_ec2_vpc_igw
+
+- name: Set IGW ID in fact
+  set_fact:
+    vpc_igw_id: "{{ new_ec2_vpc_igw.gateway_id }}"

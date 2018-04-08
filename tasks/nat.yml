@@ -1,0 +1,52 @@
+---
+
+- name: Create new presentation subnets for NAT instances
+  ec2_vpc_subnet:
+    state: "{{ state|default('present') }}"
+    region: "{{ region }}"
+    az: "{{ availability_zones[region][item|int|modulus(az_subnet|int)] }}"
+    cidr: "{{ new_vpc.cidr | ipsubnet(28, item|int) }}"
+    tags:
+      Name: "{{ availability_zones[region][item|int|modulus(az_subnet|int)] }} Presentation"
+      Stack: Management
+      Environment: Management
+      VPC: "{{ vpc_name }}"
+      CIDR: "{{ new_vpc.cidr | ipsubnet(28, item|int) }}"
+      Tier: Presentation
+      AZ: "{{ availability_zones[region][item|int|modulus(az_subnet|int)] }}"
+    vpc_id: "{{ vpc_id }}"
+  with_sequence: start=0 end={{ (az_subnet|int - 1) }}
+  register: new_subnets
+
+- name: Generate subnet_ids list
+  set_fact:
+    subnet_ids: "{{ new_subnets.results|map(attribute='subnet.id')|list }}"
+
+- name: Create new NAT gateway in each subnet
+  ec2_vpc_nat_gateway:
+    state: present
+    region: "{{ region }}"
+    subnet_id: "{{ subnet_ids[item|int|modulus(az_subnet|int)] }}"
+    wait: yes
+    if_exist_do_not_create: true
+  with_sequence: start=0 end={{ (az_subnet|int - 1) }}
+  register: ec2_vpc_nat_gw
+
+- name: Create routing tables for NAT gatway
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    purge_subnets: false
+    tags:
+      Name: "{{ vpc_name }} {{ item.1 }} Internal Routing Table"
+      VPC: "{{ vpc_name }}"
+      Tier: Internal NAT
+      Type: Internal
+      AZ: "{{ item.1 }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ item.0.nat_gateway_id }}"
+  with_together:
+    - "{{ ec2_vpc_nat_gw.results }}"
+    - "{{ availability_zones[region] }}"
+  no_log: true

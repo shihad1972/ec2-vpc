@@ -1,0 +1,37 @@
+---
+
+- name: Set region in fact
+  set_fact:
+    region: "{{ new_vpc.region }}"
+  when: region is not defined
+
+- name: Set Availability zone number if fact
+  set_fact:
+    az_subnet: "{{ availability_zones[region]|length }}"
+
+- name: Create new AWS VPC
+  ec2_vpc_net:
+    state: present
+    name: "{{ vpc_name }}"
+    cidr_block: "{{ new_vpc.cidr }}"
+    tags: "{{ new_vpc.tags }}"
+    region: "{{ region }}"
+  register: new_ec2_vpc
+
+- name: Set VPC ID in fact
+  set_fact:
+    vpc_id: "{{ new_ec2_vpc.vpc.id }}"
+
+- name: Create new DHCP Options set for VPC
+  ec2_vpc_dhcp_option:
+    domain_name: "{{ dns_domain | default(omit) }}"
+    dns_servers: AmazonProvidedDNS
+    tags:
+      Name: "VPC {{ vpc_name }}"
+      VPC: "{{ vpc_name }}"
+    vpc_id: "{{ vpc_id }}"
+    delete_old: true
+    inherit_existing: false
+
+- include: create_igw.yml
+  when: new_vpc.igw

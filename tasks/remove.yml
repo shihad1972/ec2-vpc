@@ -1,0 +1,94 @@
+---
+
+- name: Set AWS region in fact
+  set_fact:
+    region: "{{ new_vpc.region }}"
+
+- name: Get VPC facts
+  ec2_vpc_net_facts:
+    region: "{{ region }}"
+    filters:
+      "tag:Name" : "{{ vpc_name }}"
+  register: vpc_facts
+
+- name: Set VPC ID in fact
+  set_fact:
+    vpc_id: "{{ vpc_facts.vpcs[0].id }}"
+
+- name: Get NAT Gateways for VPC
+  ec2_vpc_nat_gateway_facts:
+    region: "{{ region }}"
+    filters:
+      "vpc-id": "{{ vpc_id }}"
+  register: vpc_nat_gw
+
+- name: Get subnets for VPC
+  ec2_vpc_subnet_facts:
+    region: "{{ region }}"
+    filters:
+      "vpc-id": "{{ vpc_id }}"
+  register: vpc_subnets_remove
+
+- name: Get Internet Gateway's for VPC
+  ec2_vpc_igw_facts:
+    region: "{{ region }}"
+    filters:
+      "attachment.vpc-id": "{{ vpc_id }}"
+  register: vpc_igw
+
+- name: Remove NAT gateways
+  ec2_vpc_nat_gateway:
+    state: absent
+    region: "{{ region }}"
+    wait: yes
+    nat_gateway_id: "{{ item.nat_gateway_id }}"
+    release_eip: true
+  with_items: "{{ vpc_nat_gw.result }}"
+
+- name: Remove Subnets from VPC
+  ec2_vpc_subnet:
+    region: "{{ region }}"
+    state: absent
+    vpc_id: "{{ vpc_id }}"
+    cidr: "{{ item.cidr_block }}"
+  with_items: "{{ vpc_subnets_remove.subnets }}"
+
+- name: Get routing tables for VPC
+  ec2_vpc_route_table_facts:
+    region: "{{ region }}"
+    filters:
+      vpc-id: "{{ vpc_id }}"
+  register: vpc_rt
+
+- name: Remove routing tables from VPC
+  ec2_vpc_route_table:
+    region: "{{ region }}"
+    state: absent
+    lookup: id
+    route_table_id: "{{ item.id }}"
+    vpc_id: "{{ vpc_id }}"
+  with_items: "{{ vpc_rt.route_tables }}"
+  ignore_errors: true
+
+- name: Remove Internet gateway from VPC
+  ec2_vpc_igw:
+    region: "{{ region }}"
+    state: absent
+    vpc_id: "{{ vpc_id }}"
+
+- name: Remove old AWS VPC
+  ec2_vpc_net:
+    state: absent
+    name: "{{ vpc_name }}"
+    cidr_block: "{{ new_vpc.cidr }}"
+    region: "{{ region }}"
+
+- name: Remove old DHCP options set
+  ec2_vpc_dhcp_option:
+    region: "{{ region }}"
+    dns_servers: AmazonProvidedDNS
+    domain_name: "{{ dns_domain | default(omit) }}"
+    tags:
+      Name: "VPC {{ vpc_name }}"
+      VPC: "{{ vpc_name }}"
+    state: absent
