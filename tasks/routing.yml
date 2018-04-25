@@ -19,6 +19,7 @@
     route_table_id: "{{ vpc_rt_id }}"
     region: "{{ region }}"
     purge_subnets: false
+    purge_routes: false
     tags:
       Name: "{{ vpc_name }} Presentation Routing Table"
       VPC: "{{ vpc_name }}"
