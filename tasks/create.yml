@@ -34,5 +34,5 @@
     delete_old: true
     inherit_existing: false
 
-- include: create_igw.yml
+- include: igw.yml
   when: new_vpc.igw
