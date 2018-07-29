@@ -1,0 +1,9 @@
+---
+
+- name: Create routing tables for new VPC
+  ec2_vpc_route_table:
+    region: "{{ region }}"
+    vpc_id: "{{ vpc_id }}"
+    tags:
+      Name: "{{ item }}"
+      VPC: "{{ vpc_name }}"

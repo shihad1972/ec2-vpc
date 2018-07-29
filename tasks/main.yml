@@ -3,6 +3,8 @@
 
 - include: create.yml
   when: vpc_action == 'create'
+- import_tasks: routing.yml
+  when: routing_tables is defined
 - include: nat.yml
   when: create_nat_gw is defined and new_vpc.igw and vpc_action == 'create'
 - include: remove.yml
