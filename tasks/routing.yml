@@ -7,3 +7,4 @@
     tags:
       Name: "{{ item }}"
       VPC: "{{ vpc_name }}"
+  with_items: "{{ routing_tables }}"
