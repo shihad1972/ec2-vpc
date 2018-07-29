@@ -8,9 +8,38 @@
     tags:
       Name: "Internet gateway for {{ vpc_name }} VPC"
       VPC: "{{ vpc_name }}"
-
   register: new_ec2_vpc_igw
 
 - name: Set IGW ID in fact
   set_fact:
     vpc_igw_id: "{{ new_ec2_vpc_igw.gateway_id }}"
+
+- name: Get info about route tables
+  ec2_vpc_route_table_facts:
+    region: "{{ region }}"
+    filters:
+      vpc_id: "{{ vpc_id }}"
+      "association.main": "true"
+  register: new_vpc_rt
+
+- name: Set route table ID in fact
+  set_fact:
+    vpc_rt_id: "{{ new_vpc_rt.route_tables.0.id }}"
+
+- name: Update new Public routing table
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id }}"
+    lookup: id
+    route_table_id: "{{ vpc_rt_id }}"
+    region: "{{ region }}"
+    purge_subnets: false
+    purge_routes: false
+    tags:
+      Name: "{{ vpc_name }} Public Routing Table"
+      VPC: "{{ vpc_name }}"
+      Tier: Public
+      Type: External
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ vpc_igw_id }}"
+    subnets: "{{ subnet_ids | default(omit) }}"

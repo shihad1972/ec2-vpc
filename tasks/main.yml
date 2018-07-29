@@ -5,8 +5,5 @@
   when: vpc_action == 'create'
 - include: nat.yml
   when: create_nat_gw is defined and new_vpc.igw and vpc_action == 'create'
-- include: routing.yml
-  when: vpc_action == 'create'
-
 - include: remove.yml
   when: vpc_action == 'remove'
