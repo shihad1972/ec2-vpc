@@ -33,6 +33,3 @@
     vpc_id: "{{ vpc_id }}"
     delete_old: true
     inherit_existing: false
-
-- include: igw.yml
-  when: new_vpc.igw

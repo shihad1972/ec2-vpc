@@ -3,6 +3,8 @@
 
 - import_tasks: create.yml
   when: vpc_action == 'create'
+- import_tasks: igw.yml
+  when: new_vpc.igw
 - import_tasks: routing.yml
   when: routing_tables is defined
 - import_tasks: nat.yml
