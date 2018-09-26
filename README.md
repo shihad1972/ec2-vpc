@@ -1,4 +1,4 @@
-Role Name
+ec2-vpc
 =========
 
  Create a new VPC in an AWS region. Optionally, create a subnet and NAT gateway
@@ -40,26 +40,26 @@ Dependencies
 Example Playbook
 ----------------
 
-- hosts: localhost
-  vars:
-    vpc_region: eu-west-2
-    availability_zones:
-      eu-west-2:
-        - eu-west-2a
-        - eu-west-2b
-    vpc_cidr: 172.18.0.0/16
-    vpc_action: create
-    vpc_name: Management
-    create_nat_gw: true
-    new_vpc:
-      cidr: "{{ vpc_cidr }}"
-      tags:
-        Name: "{{ vpc_name }}"
-        CIDR: "{{ vpc_cidr }}"
-        Region: "{{ vpc_region }}"
-      igw: true
-      region: "{{ vpc_region }}"
-  roles:
+    - hosts: localhost
+      vars:
+        vpc_region: eu-west-2
+        availability_zones:
+          eu-west-2:
+            - eu-west-2a
+            - eu-west-2b
+        vpc_cidr: 172.18.0.0/16
+        vpc_action: create
+        vpc_name: Management
+        create_nat_gw: true
+        new_vpc:
+          cidr: "{{ vpc_cidr }}"
+          tags:
+            Name: "{{ vpc_name }}"
+            CIDR: "{{ vpc_cidr }}"
+            Region: "{{ vpc_region }}"
+          igw: true
+          region: "{{ vpc_region }}"
+      roles:
     - role: ec2-vpc
 
 License
