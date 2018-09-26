@@ -18,7 +18,7 @@ Role Variables
                    availablity zones with the region as key. Check example
                    playbook below. This will also create the initial
                    presentation subnets, that will have direct access to the
-                   internet via the IGW. You must also be createing an IGW.
+                   internet via the IGW. You must also be creating an IGW.
                    Subnets will be /28, and 1 in each AZ.
   - dns_domain: set to a DNS domain name. This will update the DHCP options to
                 the default DNS search domain for instances created in this VPC
