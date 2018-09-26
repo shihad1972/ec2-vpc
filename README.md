@@ -26,7 +26,7 @@ Role Variables
   - new_vpc:   A dict containing information about the new VPC. This must
                contain the following keys:
 
-  - new_vpc:
+    - new_vpc:
       cidr: ip/mask CIDR for new VPC
       tags: Dict of tags to apply to new VPC
       igw: true / false to create an Internet Gateway with the VPC
