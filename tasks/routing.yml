@@ -4,7 +4,11 @@
   ec2_vpc_route_table:
     region: "{{ region }}"
     vpc_id: "{{ vpc_id }}"
+    purge_subnets: false
+    purge_routes: false
     tags:
-      Name: "{{ item }}"
+      Name: "{{ vpc_name }} {{ item }} Routing Table"
       VPC: "{{ vpc_name }}"
-  with_items: "{{ routing_tables }}"
+  with_items:
+    - Data
+    - Private
